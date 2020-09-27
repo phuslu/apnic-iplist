@@ -1,0 +1,27 @@
+name: update
+
+on:
+  schedule:
+    - cron: '45 16 * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update
+        run: |
+          git clone https://${IPLIST_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          wget -N -O delegated-apnic-latest http://ftp.apnic.net/stats/apnic/delegated-apnic-latest
+          cd apnic-iplist
+          for geo in cn sg; do
+             cat ../delegated-apnic-latest | grep -i "^apnic|${geo}|ipv4|" | awk -F'|' '{printf("%s/%d\n", $4, 32-log($5)/log(2))}' >${geo}.txt
+          done
+          git add *.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git commit -m "update iplist" -a; then
+            git push origin master
+          fi
+          true
+        env:
+          IPLIST_TOKEN: ${{ secrets.IPLIST_TOKEN }}
