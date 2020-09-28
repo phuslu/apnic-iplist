@@ -2,7 +2,7 @@ name: update
 
 on:
   schedule:
-    - cron: '0 18 * * *'
+    - cron: '0 4 * * *'
 
 jobs:
   update:
@@ -13,11 +13,11 @@ jobs:
           git clone https://${IPLIST_TOKEN}@github.com/${GITHUB_REPOSITORY}
           wget -N -O delegated-apnic-latest http://ftp.apnic.net/stats/apnic/delegated-apnic-latest
           cd apnic-iplist
-          for geo in cn sg; do
+          for geotxt in $(ls ??.txt); do
              cat ../delegated-apnic-latest | \
-             grep -i "^apnic|${geo}|ipv4|" | \
+             grep -i "^apnic|${geotxt%.*}|ipv4|" | \
              awk -F'|' '{printf("%s/%d\n", $4, 32-log($5)/log(2))}' | \
-             ./cidrmerge > ${geo}.txt
+             ./cidrmerge > ${geotxt}
           done
           git add *.txt
           git config user.name "github-actions[bot]"
