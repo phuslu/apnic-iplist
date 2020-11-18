@@ -33,3 +33,6 @@ jobs:
               -n gotip.linux-amd64.tar.xz -f /tmp/gotip.linux-amd64.tar.xz
         env:
           GOTIP_TOKEN: ${{ secrets.GOTIP_TOKEN }}
+      - name: Test
+        run: |
+          curl https://github.com/phuslu/gotip/releases/download/v0.0.0/gotip.linux-amd64.tar.xz >/dev/null
