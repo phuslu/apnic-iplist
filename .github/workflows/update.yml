@@ -2,7 +2,7 @@ name: gotip
 
 on:
   schedule:
-    - cron: '50 * * * *'
+    - cron: '11 * * * *'
 
 jobs:
   gotip:
@@ -22,15 +22,14 @@ jobs:
       - name: Tarball
         run: |
           cd /opt
-          tar -Ipixz -cvf /tmp/gotip.linux-amd64.tar.xz go
+          tar -Ipixz -cf /tmp/gotip.linux-amd64.tar.xz go
       - name: Release
         run: |
-          export GITHUB_TOKEN=${GOTIP_TOKEN}
           curl -L https://github.com/github-release/github-release/releases/download/v0.9.0/linux-amd64-github-release.bz2 | bzip2 -d >github-release
-          chmod +x github-release
-          ./github-release -v upload --replace \
-              --user phuslu --repo gotip \
-              --tag v0.0.0 --name gotip.linux-amd64.tar.xz \
-              --file /tmp/gotip.linux-amd64.tar.xz
+          chmod +x github-release && sudo mv github-release /usr/bin/
+          github-release delete -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 || true
+          github-release release -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 --target master
+          github-release -v upload -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 \
+              -n gotip.linux-amd64.tar.xz -f /tmp/gotip.linux-amd64.tar.xz
         env:
           GOTIP_TOKEN: ${{ secrets.GOTIP_TOKEN }}
