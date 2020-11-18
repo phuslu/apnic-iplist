@@ -1,19 +1,36 @@
-name: update
+name: gotip
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '50 * * * *'
 
 jobs:
-  update:
+  gotip:
     runs-on: ubuntu-latest
     steps:
-      - name: Update
+      - name: Setup
         run: |
-          git clone https://${IPLIST_TOKEN}@github.com/${GITHUB_REPOSITORY}
-          cd $(basename ${GITHUB_REPOSITORY})
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          bash -xe .update.bash
+          sudo DEBIAN_FRONTEND=noninteractive apt install -yq golang pixz bzip2
+      - name: Clone
+        run: |
+          git clone --depth=1 https://go.googlesource.com/go
+          sudo mv go /opt/
+      - name: Make
+        run: |
+          cd /opt/go/src
+          ./make.bash
+      - name: Tarball
+        run: |
+          cd /opt
+          tar -Ipixz -cvf /tmp/gotip.linux-amd64.tar.xz go
+      - name: Release
+        run: |
+          export GITHUB_TOKEN=${GOTIP_TOKEN}
+          curl -L https://github.com/github-release/github-release/releases/download/v0.9.0/linux-amd64-github-release.bz2 | bzip2 -d >github-release
+          chmod +x github-release
+          ./github-release -v upload --replace \
+              --user phuslu --repo gotip \
+              --tag v0.0.0 --name gotip.linux-amd64.tar.xz \
+              --file /tmp/gotip.linux-amd64.tar.xz
         env:
-          IPLIST_TOKEN: ${{ secrets.IPLIST_TOKEN }}
+          GOTIP_TOKEN: ${{ secrets.GOTIP_TOKEN }}
