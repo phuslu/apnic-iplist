@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Setup
         run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt install -yq golang pixz bzip2
+          sudo DEBIAN_FRONTEND=noninteractive apt install -yq golang pigz bzip2
       - name: Clone
         run: |
           git clone --depth=1 https://go.googlesource.com/go
@@ -22,7 +22,7 @@ jobs:
       - name: Tarball
         run: |
           cd /opt
-          tar -Ipixz -cf /tmp/gotip.linux-amd64.tar.xz go
+          tar -Ipigz -cf /tmp/gotip.linux-amd64.tar.gz go
       - name: Release
         run: |
           curl -L https://github.com/github-release/github-release/releases/download/v0.9.0/linux-amd64-github-release.bz2 | bzip2 -d >github-release
@@ -30,9 +30,9 @@ jobs:
           github-release delete -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 || true
           github-release release -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 --target master
           github-release -v upload -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 \
-              -n gotip.linux-amd64.tar.xz -f /tmp/gotip.linux-amd64.tar.xz
+              -n gotip.linux-amd64.tar.gz -f /tmp/gotip.linux-amd64.tar.gz
         env:
           GOTIP_TOKEN: ${{ secrets.GOTIP_TOKEN }}
       - name: Test
         run: |
-          curl https://github.com/phuslu/gotip/releases/download/v0.0.0/gotip.linux-amd64.tar.xz >/dev/null
+          curl -L https://github.com/phuslu/gotip/releases/download/v0.0.0/gotip.linux-amd64.tar.gz >/dev/null
