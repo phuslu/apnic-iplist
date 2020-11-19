@@ -22,7 +22,7 @@ jobs:
       - name: Tarball
         run: |
           cd /opt
-          rm -rf go/.git
+          rm -rf go/.git go/pkg/linux_amd64/cmd
           tar -cf /tmp/gotip.linux-amd64.tar go
           pigz -9 /tmp/gotip.linux-amd64.tar
       - name: Release
