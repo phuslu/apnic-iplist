@@ -23,7 +23,8 @@ jobs:
         run: |
           cd /opt
           rm -rf go/.git
-          tar -Ipigz -cf /tmp/gotip.linux-amd64.tar.gz go
+          tar -cf /tmp/gotip.linux-amd64.tar go
+          pigz -9 /tmp/gotip.linux-amd64.tar
       - name: Release
         run: |
           curl -L https://github.com/github-release/github-release/releases/download/v0.9.0/linux-amd64-github-release.bz2 | bzip2 -d >github-release
