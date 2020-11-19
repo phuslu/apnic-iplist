@@ -22,6 +22,7 @@ jobs:
       - name: Tarball
         run: |
           cd /opt
+          rm -rf go/.git
           tar -Ipigz -cf /tmp/gotip.linux-amd64.tar.gz go
       - name: Release
         run: |
