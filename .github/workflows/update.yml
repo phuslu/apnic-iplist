@@ -2,7 +2,7 @@ name: gotip
 
 on:
   schedule:
-    - cron: '11 * * * *'
+    - cron: '10 * * * *'
 
 jobs:
   gotip:
