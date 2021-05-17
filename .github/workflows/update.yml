@@ -7,6 +7,9 @@ on:
 jobs:
   gotip:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows]
     steps:
       - name: Setup
         run: |
@@ -18,13 +21,12 @@ jobs:
       - name: Make
         run: |
           cd /opt/go/src
-          ./make.bash
+          env GOOS=${{ matrix.goos }} ./make.bash
       - name: Tarball
         run: |
           cd /opt
-          rm -rf go/.git go/pkg/linux_amd64/cmd
-          tar -cf /tmp/gotip.linux-amd64.tar go
-          pigz -9 /tmp/gotip.linux-amd64.tar
+          tar -cf /tmp/gotip.${{ matrix.goos }}-amd64.tar go
+          pigz -9 /tmp/gotip.${{ matrix.goos }}-amd64.tar
       - name: Release
         run: |
           curl -L https://github.com/github-release/github-release/releases/download/v0.9.0/linux-amd64-github-release.bz2 | bzip2 -d >github-release
@@ -32,9 +34,6 @@ jobs:
           github-release delete -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 || true
           github-release release -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 --target master
           github-release -v upload -s ${GOTIP_TOKEN} -u phuslu -r gotip -t v0.0.0 \
-              -n gotip.linux-amd64.tar.gz -f /tmp/gotip.linux-amd64.tar.gz
+              -n gotip.${{ matrix.goos }}-amd64.tar.gz -f /tmp/gotip.${{ matrix.goos }}-amd64.tar.gz
         env:
           GOTIP_TOKEN: ${{ secrets.GOTIP_TOKEN }}
-      - name: Test
-        run: |
-          curl -L https://github.com/phuslu/gotip/releases/download/v0.0.0/gotip.linux-amd64.tar.gz >/dev/null
