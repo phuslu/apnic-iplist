@@ -21,7 +21,7 @@ jobs:
       - name: Make
         run: |
           cd /opt/go/src
-          env GOOS=${{ matrix.goos }} ./make.bash
+          env CGO_ENABLED=0 GOOS=${{ matrix.goos }} ./make.bash
       - name: Tarball
         run: |
           cd /opt
